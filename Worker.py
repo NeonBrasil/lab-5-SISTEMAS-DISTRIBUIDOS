@@ -12,9 +12,11 @@ sender = ctx.socket(zmq.PUSH)
 sender.connect("tcp://localhost:5556")
 
 while True:
-    workload = receiver.recv_string()
-    print(f"Tempo: {workload}ms")
+    data = receiver.recv_json()
+    value = data["value"]
+    scalar = data["scalar"]
+    row = data["row"]
+    col = data["col"]
 
-    time.sleep(int(workload)*0.001) # simula a execução da tarefa
-
-    sender.send_string(f"{workload}") # envia resultado para o sink
+    result = value * scalar
+    sender.send_json({"result": result, "row": row, "col": col})

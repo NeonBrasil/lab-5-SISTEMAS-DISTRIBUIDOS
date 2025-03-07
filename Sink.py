@@ -1,6 +1,5 @@
-import sys
-import time
 import zmq
+import time
 
 ctx = zmq.Context()
 
@@ -9,12 +8,23 @@ receiver = ctx.socket(zmq.PULL)
 receiver.bind("tcp://*:5556")
 
 s = receiver.recv() # espera por mensagem do ventilator
-t_start = time.time() # inicia contagem do tempo
 tasks = 100
 
-for task_nbr in range(tasks):
-    s = receiver.recv_string()
-    print(".", end="")
+# Receber as dimensões da matriz
+rows = int(input("Digite o número de linhas da matriz: "))
+cols = int(input("Digite o número de colunas da matriz: "))
 
-t_end = time.time()
-print(f"\nTempo total: {(t_end-t_start):.5f}s")
+# Inicializar a matriz resultante
+result_matrix = [[0 for _ in range(cols)] for _ in range(rows)]
+
+for _ in range(rows * cols):
+    data = receiver.recv_json()
+    result = data["result"]
+    row = data["row"]
+    col = data["col"]
+    result_matrix[row][col] = result
+
+# Exibir a matriz resultante
+print("Matriz resultante:")
+for row in result_matrix:
+    print(" ".join(map(str, row)))
